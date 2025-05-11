@@ -3,8 +3,14 @@
 import time
 
 import requests
+import logging
 from client import ChaosClient, FakerClient
 from flask import Flask, make_response
+from logging_utils import handler
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+logger.addHandler(handler)
 
 # global variables
 app = Flask(__name__)
@@ -12,10 +18,16 @@ app = Flask(__name__)
 @app.route("/users", methods=["GET"])
 def get_user():
     user, status = db.get_user(123)
+    logging.info(f"Found user {user!s} with status {status}")
     data = {}
     if user is not None:
         data = {"id": user.id, "name": user.name, "address": user.address}
+    else:
+        logging.warning(f"Could not find user with id {123}")
+        logging.debug(f"Collected data is {data}")
+        
     response = make_response(data, status)
+    logging.debug(f"Generated response {response}")
     return response
 
 
